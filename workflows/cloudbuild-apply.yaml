@@ -328,13 +328,7 @@ artifacts:
   objects:
     location: "gs://${_STATE_BUCKET}/builds/${BUILD_ID}"
     paths:
-      - "apply_output.txt"
-      - "deployment_info.txt"
       - "rollback_status.txt"
-      - "rollback_plan.txt"
-      - "rollback_apply.txt"
-      - "current_commit.txt"
-      - "last_successful_commit.txt"
 
 timeout: "3600s" # 60 minutes (increased to account for potential rollback)
 
