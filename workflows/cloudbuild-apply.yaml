@@ -12,8 +12,8 @@ steps:
 
         # Store current commit SHA for this deployment attempt
         CURRENT_SHA=$(git rev-parse HEAD)
-        echo "${CURRENT_SHA}" > /workspace/current_commit.txt
-        echo "Current commit: ${CURRENT_SHA}"
+        echo "$${CURRENT_SHA}" > /workspace/current_commit.txt
+        echo "Current commit: $${CURRENT_SHA}"
 
         # Try to fetch last successful deployment SHA from GCS
         gsutil cp gs://${_STATE_BUCKET}/deployments/last_successful_commit.txt /workspace/last_successful_commit.txt 2>/dev/null || {
@@ -23,7 +23,7 @@ steps:
         }
 
         LAST_SUCCESSFUL_SHA=$(cat /workspace/last_successful_commit.txt)
-        echo "Last successful deployment: ${LAST_SUCCESSFUL_SHA}"
+        echo "Last successful deployment: $${LAST_SUCCESSFUL_SHA}"
 
         # Mark that we haven't applied yet
         echo "APPLY_STATUS=not_started" > /workspace/apply_status.txt
@@ -123,14 +123,14 @@ steps:
         # Check if apply failed
         APPLY_STATUS=$(cat /workspace/apply_status.txt)
 
-        if echo "${APPLY_STATUS}" | grep -q "APPLY_STATUS=failed"; then
+        if echo "$${APPLY_STATUS}" | grep -q "APPLY_STATUS=failed"; then
           echo ""
           echo "🔄 Apply failed - Initiating infrastructure rollback..."
           echo "********************************"
           
           LAST_SUCCESSFUL_SHA=$(cat /workspace/last_successful_commit.txt)
           
-          if [ "${LAST_SUCCESSFUL_SHA}" = "NONE" ]; then
+          if [ "$${LAST_SUCCESSFUL_SHA}" = "NONE" ]; then
             echo "❌ No previous successful deployment to rollback to!"
             echo "This was the first deployment attempt."
             echo "Manual cleanup of partial resources may be required."
@@ -138,10 +138,10 @@ steps:
             exit 1
           fi
           
-          echo "Rolling back to commit: ${LAST_SUCCESSFUL_SHA}"
+          echo "Rolling back to commit: $${LAST_SUCCESSFUL_SHA}"
           
           # Checkout previous successful commit
-          git checkout ${LAST_SUCCESSFUL_SHA} || {
+          git checkout $${LAST_SUCCESSFUL_SHA} || {
             echo "❌ Failed to checkout previous commit!"
             echo "ROLLBACK_STATUS=git_checkout_failed" > /workspace/rollback_status.txt
             exit 1
@@ -165,7 +165,7 @@ steps:
       - |
         ROLLBACK_STATUS=$(cat /workspace/rollback_status.txt)
 
-        if echo "${ROLLBACK_STATUS}" | grep -q "ROLLBACK_STATUS=initiated"; then
+        if echo "$${ROLLBACK_STATUS}" | grep -q "ROLLBACK_STATUS=initiated"; then
           echo "********************************"
           echo "* Executing infrastructure rollback *"
           echo "********************************"
@@ -211,7 +211,7 @@ steps:
           echo ""
           echo "✅ Infrastructure rolled back successfully!"
           LAST_SUCCESSFUL_SHA=$(cat /workspace/last_successful_commit.txt)
-          echo "Infrastructure restored to commit: ${LAST_SUCCESSFUL_SHA}"
+          echo "Infrastructure restored to commit: $${LAST_SUCCESSFUL_SHA}"
           echo "ROLLBACK_STATUS=success" > /workspace/rollback_status.txt
           
           # The overall build should still fail to indicate the original deployment failed
@@ -231,7 +231,7 @@ steps:
       - |
         APPLY_STATUS=$(cat /workspace/apply_status.txt)
 
-        if echo "${APPLY_STATUS}" | grep -q "APPLY_STATUS=success"; then
+        if echo "$${APPLY_STATUS}" | grep -q "APPLY_STATUS=success"; then
           echo "********************************"
           echo "* Infrastructure Outputs        *"
           echo "********************************"
@@ -258,7 +258,7 @@ steps:
       - |
         APPLY_STATUS=$(cat /workspace/apply_status.txt)
 
-        if echo "${APPLY_STATUS}" | grep -q "APPLY_STATUS=success"; then
+        if echo "$${APPLY_STATUS}" | grep -q "APPLY_STATUS=success"; then
           echo "********************************"
           echo "* Saving successful deployment  *"
           echo "********************************"
@@ -266,7 +266,7 @@ steps:
           CURRENT_SHA=$(cat /workspace/current_commit.txt)
           
           # Store this as the last successful deployment
-          echo "${CURRENT_SHA}" > /workspace/last_successful_commit.txt
+          echo "$${CURRENT_SHA}" > /workspace/last_successful_commit.txt
           gsutil cp /workspace/last_successful_commit.txt gs://${_STATE_BUCKET}/deployments/last_successful_commit.txt || {
             echo "⚠️  Warning: Failed to save successful commit SHA"
           }
@@ -294,8 +294,8 @@ steps:
 
         echo "Build ID: ${BUILD_ID}" > /workspace/deployment_info.txt
         echo "Commit SHA: ${SHORT_SHA}" >> /workspace/deployment_info.txt
-        echo "${APPLY_STATUS}" >> /workspace/deployment_info.txt
-        echo "${ROLLBACK_STATUS}" >> /workspace/deployment_info.txt
+        echo "$${APPLY_STATUS}" >> /workspace/deployment_info.txt
+        echo "$${ROLLBACK_STATUS}" >> /workspace/deployment_info.txt
 
         # Save apply output
         if [ -f /workspace/apply_output.txt ]; then
