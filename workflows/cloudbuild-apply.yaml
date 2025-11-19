@@ -152,10 +152,11 @@ steps:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
           echo "Rolling back to commit: $${LAST_SUCCESSFUL_SHA}"
+          echo "Reverting commit: ${COMMIT_SHA}"
           
           # Checkout previous successful commit
-          git revert --no-edit $${LAST_SUCCESSFUL_SHA} || {
-            echo "❌ Failed to checkout previous commit!"
+          git revert --no-edit ${COMMIT_SHA} || {
+            echo "❌ Failed to revert commit!"
             echo "ROLLBACK_STATUS=git_checkout_failed" > /workspace/rollback_status.txt
             exit 1
           }
