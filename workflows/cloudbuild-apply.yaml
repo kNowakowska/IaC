@@ -271,7 +271,6 @@ steps:
   # Step 7: Save Successful Deployment Info
   - name: "gcr.io/cloud-builders/gsutil"
     id: "save-success"
-    waitFor: ["output"]
     entrypoint: "sh"
     args:
       - "-c"
@@ -300,7 +299,6 @@ steps:
   # Step 8: Save Build Artifacts
   - name: "gcr.io/cloud-builders/gsutil"
     id: "backup"
-    waitFor: ["rollback-apply"]
     entrypoint: "sh"
     args:
       - "-c"
