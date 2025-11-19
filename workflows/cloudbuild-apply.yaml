@@ -101,12 +101,12 @@ steps:
           echo "❌ Terraform apply failed!"
           echo "Please review the errors above. Infrastructure may be in a partial state."
           echo "APPLY_STATUS=failed" > /workspace/apply_status.txt
-          exit 1
         }
 
-        echo ""
-        echo "✅ Deployment completed successfully!"
-        echo "APPLY_STATUS=success" > /workspace/apply_status.txt
+        if ! echo "$${APPLY_STATUS}" | grep -q "APPLY_STATUS=failed"; then
+          echo "✅ Deployment completed successfully!"
+          echo "APPLY_STATUS=success" > /workspace/apply_status.txt
+        fi
 
   # Step 4: Rollback on Failure (conditional)
   - name: "gcr.io/cloud-builders/git"
