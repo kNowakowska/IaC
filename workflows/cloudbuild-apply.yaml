@@ -323,13 +323,6 @@ steps:
 
         echo "✅ Build artifacts saved successfully"
 
-# Store outputs as build artifacts
-artifacts:
-  objects:
-    location: "gs://${_STATE_BUCKET}/builds/${BUILD_ID}"
-    paths:
-      - "rollback_status.txt"
-
 timeout: "3600s" # 60 minutes (increased to account for potential rollback)
 
 options:
