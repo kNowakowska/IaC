@@ -101,9 +101,12 @@ steps:
           echo "❌ Terraform apply failed!"
           echo "Please review the errors above. Infrastructure may be in a partial state."
           echo "APPLY_STATUS=failed" > /workspace/apply_status.txt
+          APPLY_STATUS=failed
         }
 
-        if ! echo "$${APPLY_STATUS}" | grep -q "APPLY_STATUS=failed"; then
+        echo "APPLY_STATUS: $${APPLY_STATUS}"
+
+        if ! echo "$${APPLY_STATUS}" | grep -q "failed"; then
           echo "✅ Deployment completed successfully!"
           echo "APPLY_STATUS=success" > /workspace/apply_status.txt
         fi
