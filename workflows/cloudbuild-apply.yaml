@@ -268,80 +268,80 @@ steps:
   #         exit 1
   #       fi
 
-  # # Step 7: Save Successful Deployment Info
-  # - name: "gcr.io/cloud-builders/gsutil"
-  #   id: "save-success"
-  #   waitFor: ["output"]
-  #   entrypoint: "sh"
-  #   args:
-  #     - "-c"
-  #     - |
-  #       APPLY_STATUS=$(cat /workspace/apply_status.txt)
+  # Step 7: Save Successful Deployment Info
+  - name: "gcr.io/cloud-builders/gsutil"
+    id: "save-success"
+    waitFor: ["output"]
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        APPLY_STATUS=$(cat /workspace/apply_status.txt)
 
-  #       if echo "$${APPLY_STATUS}" | grep -q "APPLY_STATUS=success"; then
-  #         echo "********************************"
-  #         echo "* Saving successful deployment  *"
-  #         echo "********************************"
+        if echo "$${APPLY_STATUS}" | grep -q "APPLY_STATUS=success"; then
+          echo "********************************"
+          echo "* Saving successful deployment  *"
+          echo "********************************"
 
-  #         CURRENT_SHA=$(cat /workspace/current_commit.txt)
+          CURRENT_SHA=$(cat /workspace/current_commit.txt)
 
-  #         # Store this as the last successful deployment
-  #         echo "$${CURRENT_SHA}" > /workspace/last_successful_commit.txt
-  #         gsutil cp /workspace/last_successful_commit.txt gs://${_STATE_BUCKET}/deployments/last_successful_commit.txt || {
-  #           echo "⚠️  Warning: Failed to save successful commit SHA"
-  #         }
+          # Store this as the last successful deployment
+          echo "$${CURRENT_SHA}" > /workspace/last_successful_commit.txt
+          gsutil cp /workspace/last_successful_commit.txt gs://${_STATE_BUCKET}/deployments/last_successful_commit.txt || {
+            echo "⚠️  Warning: Failed to save successful commit SHA"
+          }
 
-  #         echo "✅ Deployment SHA saved for future rollbacks"
-  #       else
-  #         echo "Deployment failed - not updating last successful SHA"
-  #         exit 1
-  #       fi
+          echo "✅ Deployment SHA saved for future rollbacks"
+        else
+          echo "Deployment failed - not updating last successful SHA"
+          exit 1
+        fi
 
-  # # Step 8: Save Build Artifacts
-  # - name: "gcr.io/cloud-builders/gsutil"
-  #   id: "backup"
-  #   waitFor: ["rollback-apply"]
-  #   entrypoint: "sh"
-  #   args:
-  #     - "-c"
-  #     - |
-  #       echo "********************************"
-  #       echo "* Backing up build artifacts... *"
-  #       echo "********************************"
+  # Step 8: Save Build Artifacts
+  - name: "gcr.io/cloud-builders/gsutil"
+    id: "backup"
+    waitFor: ["rollback-apply"]
+    entrypoint: "sh"
+    args:
+      - "-c"
+      - |
+        echo "********************************"
+        echo "* Backing up build artifacts... *"
+        echo "********************************"
 
-  #       APPLY_STATUS=$(cat /workspace/apply_status.txt)
-  #       ROLLBACK_STATUS=$(cat /workspace/rollback_status.txt)
+        APPLY_STATUS=$(cat /workspace/apply_status.txt)
+        ROLLBACK_STATUS=$(cat /workspace/rollback_status.txt)
 
-  #       echo "Build ID: ${BUILD_ID}" > /workspace/deployment_info.txt
-  #       echo "Commit SHA: ${SHORT_SHA}" >> /workspace/deployment_info.txt
-  #       echo "$${APPLY_STATUS}" >> /workspace/deployment_info.txt
-  #       echo "$${ROLLBACK_STATUS}" >> /workspace/deployment_info.txt
+        echo "Build ID: ${BUILD_ID}" > /workspace/deployment_info.txt
+        echo "Commit SHA: ${SHORT_SHA}" >> /workspace/deployment_info.txt
+        echo "$${APPLY_STATUS}" >> /workspace/deployment_info.txt
+        echo "$${ROLLBACK_STATUS}" >> /workspace/deployment_info.txt
 
-  #       # Save apply output
-  #       if [ -f /workspace/apply_output.txt ]; then
-  #         gsutil cp /workspace/apply_output.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-apply-${SHORT_SHA}.log || {
-  #           echo "⚠️  Warning: Failed to backup apply output"
-  #         }
-  #       fi
+        # Save apply output
+        if [ -f /workspace/apply_output.txt ]; then
+          gsutil cp /workspace/apply_output.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-apply-${SHORT_SHA}.log || {
+            echo "⚠️  Warning: Failed to backup apply output"
+          }
+        fi
 
-  #       # Save rollback outputs if they exist
-  #       if [ -f /workspace/rollback_plan.txt ]; then
-  #         gsutil cp /workspace/rollback_plan.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-rollback-plan-${SHORT_SHA}.log || {
-  #           echo "⚠️  Warning: Failed to backup rollback plan"
-  #         }
-  #       fi
+        # Save rollback outputs if they exist
+        if [ -f /workspace/rollback_plan.txt ]; then
+          gsutil cp /workspace/rollback_plan.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-rollback-plan-${SHORT_SHA}.log || {
+            echo "⚠️  Warning: Failed to backup rollback plan"
+          }
+        fi
 
-  #       if [ -f /workspace/rollback_apply.txt ]; then
-  #         gsutil cp /workspace/rollback_apply.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-rollback-apply-${SHORT_SHA}.log || {
-  #           echo "⚠️  Warning: Failed to backup rollback apply output"
-  #         }
-  #       fi
+        if [ -f /workspace/rollback_apply.txt ]; then
+          gsutil cp /workspace/rollback_apply.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-rollback-apply-${SHORT_SHA}.log || {
+            echo "⚠️  Warning: Failed to backup rollback apply output"
+          }
+        fi
 
-  #       gsutil cp /workspace/deployment_info.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-info.txt || {
-  #         echo "⚠️  Warning: Failed to backup deployment info"
-  #       }
+        gsutil cp /workspace/deployment_info.txt gs://${_STATE_BUCKET}/deployments/${BUILD_ID}-info.txt || {
+          echo "⚠️  Warning: Failed to backup deployment info"
+        }
 
-  #       echo "✅ Build artifacts saved successfully"
+        echo "✅ Build artifacts saved successfully"
 
 timeout: "3600s" # 60 minutes (increased to account for potential rollback)
 
