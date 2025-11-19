@@ -43,19 +43,18 @@ resource "google_compute_instance" "vm2" {
 }
 
 
-/*
+
 resource "google_compute_instance" "invalid" {
   name         = "fail-test"
-  machine_type = "INVALID_TYPE"  # <-- This will fail
+  machine_type = "INVALID_TYPE" # <-- This will fail
   zone         = "us-central1-a"
-  boot_disk { 
-    initialize_params { 
-      image = var.image 
-    } 
+  boot_disk {
+    initialize_params {
+      image = var.image
+    }
   }
-  network_interface { 
-    subnetwork = var.subnet 
-    access_config {} 
+  network_interface {
+    subnetwork = var.subnet
+    access_config {}
   }
 }
-*/
